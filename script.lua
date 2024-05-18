@@ -4,7 +4,7 @@ local publish_ip = get("publish-input-ip")
 local publish_done = get("done-1")
 
 local update_key = get("update-input-key")
-local update_tld = get("update-input-ip")
+local update_ip = get("update-input-ip")
 local update_done = get("done-2")
 
 local delete_key = get("delete-input-key")
@@ -61,31 +61,67 @@ publish_done.on_click(function()
 	end
 end)
 
--- btn.on_click(function()
---     print("clicked!")
--- end)
+update_done.on_click(function()
+    local body = "{"
+        .. '"ip": "'
+        .. update_ip.get_content()
+        .. '"'
+        .. "}"
 
--- get("input").on_submit(function(content)
---     print(content)
--- end)
+    local res = fetch({
+        url = "http://api.buss.lol/domain/" .. update_key.get_content(),
+        method = "PUT",
+        headers = { ["Content-Type"] = "application/json" },
+        body = body,
+    })
 
--- get("input").on_input(function(content)
---     print(content)
--- end)
+    print(res)
+    
+    if res and res.status then
+        if res.status == 429 then
+            result.set_content("Failed due to ratelimit.")
+        elseif res.status == 404 then
+            result.set_content("Failed due to: domain not found.")
+        elseif res.status == 400 then
+            result.set_content("Failed due to: invalid body.\nMake sure all fields are completed");
+        elseif res.status == 200 then
+            result.set_content("Success!")
+        else
+            result.set_content("Failed due to error: " .. res.status)
+        end
+    elseif res and res.ip then
+        result.set_content(
+            "Success!"
+            )
+    else
+        result.set_content("Failed due to unknown error.")
+    end
+end)
 
--- get("textarea").on_input(function(content)
---     print(content)
--- end)
+delete_done.on_click(function()
+    local res = fetch({
+        url = "http://api.buss.lol/domain/" .. delete_key.get_content(),
+        method = "DELETE",
+        headers = { ["Content-Type"] = "application/json" },
+    })
 
--- get("futurelink").set_href("https://www.duckduckgo.com/")
-
--- coroutine.wrap(function()
--- 	local res = fetch({
--- 		url = "http://127.0.0.1:3000/",
--- 		method = "POST",
--- 		headers = { ["Content-Type"] = "application/json" },
--- 		body = '{ "test": 3 }',
--- 	})
-
--- 	print("hlelo", { hello = true })
--- end)()
+    print(res)
+    
+    if res and res.status then
+        if res.status == 429 then
+            result.set_content("Failed due to ratelimit.")
+        elseif res.status == 404 then
+            result.set_content("Failed due to: domain not found.")
+        elseif res.status == 200 then
+            result.set_content("Success!")
+        else
+            result.set_content("Failed due to error: " .. res.status)
+        end
+    elseif res and res.secret_key then
+        result.set_content(
+            "Success!"
+            )
+    else
+        result.set_content("Failed due to unknown error.")
+    end
+end)

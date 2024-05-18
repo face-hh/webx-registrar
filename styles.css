@@ -1,3 +1,9 @@
+body {
+    background-color: #242424;
+    padding: 10px;
+    border-radius: 12px;
+}
+
 introduction {
     direction: column;
     align-items: center;
