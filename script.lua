@@ -46,8 +46,10 @@ publish_done.on_click(function()
 	print(res)
 	if res and res.status then
 		if res.status == 429 then
-			result.set_content("Failed due to ratelimit.")
-		else
+			result.set_content("Failed due to ratelimit. Try again in an hour.")
+		if res.status == 400 then
+            result.set_content("Failed either due to:\n- Your DNS wasn't from the list\n-Your domain name is over 24 chars.\n- Your domain name was detected as offensive.")
+        else
 			result.set_content("Failed due to error: " .. res.status)
 		end
 	elseif res and res.secret_key then
