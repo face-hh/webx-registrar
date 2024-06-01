@@ -1,3 +1,5 @@
+print(window.query)
+
 local publish_domain = get("publish-input-domain")
 local publish_tld = get("publish-input-tld")
 local publish_ip = get("publish-input-ip")
@@ -11,6 +13,8 @@ local delete_key = get("delete-input-key")
 local delete_done = get("done-3")
 
 local result = get("result")
+local img = get("image")
+local captcha_input = get("captcha_input")
 
 coroutine.wrap(function()
     local res = fetch({
@@ -23,41 +27,53 @@ coroutine.wrap(function()
     get("tlds").set_content("Available TLDs: " .. tld_list)
 end)()
 
-publish_done.on_click(function()
+function fetch_dns(captcha)
     local body = "{"
-        .. '"tld": "'
-        .. publish_tld.get_content()
-        .. '", '
-        .. '"name": "'
-        .. publish_domain.get_content()
-        .. '", '
-        .. '"ip": "'
-        .. publish_ip.get_content()
-        .. '"'
-        .. "}"
+    .. '"tld": "'
+    .. publish_tld.get_content()
+    .. '", '
+    .. '"name": "'
+    .. publish_domain.get_content()
+    .. '", '
+    .. '"ip": "'
+    .. publish_ip.get_content()
+    .. '"'
 
+    if captcha then
+        body = body .. ', "captcha": "' .. captcha_input.get_content() .. '" }'
+    else
+        body = body .. "}"
+    end
+
+    print(body)
     local res = fetch({
-        url = "http://api.buss.lol/domain",
+        url = "http://localhost:8000/domain",
         method = "POST",
         headers = { ["Content-Type"] = "application/json" },
         body = body,
     })
+   
+    return res
+end
+
+captcha_input.on_submit(function()
+    local res = fetch_dns(true);
 
     print(res)
+    if res["secret_key"] then
+        result.set_content("Congrats! Your key: " .. res["secret_key"] .. "\nPLEASE SAVE IT.")
+    end
+end)
+
+publish_done.on_click(function()
+    local res = fetch_dns(false)
+
     if res and res.status then
-        if res.status == 429 then
-            result.set_content("Failed due to ratelimit. Try again in an hour.")
-        elseif res.status == 400 then
-            result.set_content("Failed either due to:\n- Your DNS wasn't from the list\n- Your domain name is over 24 chars.\n- Your domain name was detected as offensive.")
+        if res.status == 202 then
+            img.set_source('http://localhost:8000/captcha-images/' .. res.content .. '.jpg')
         else
-            result.set_content("Failed due to error: " .. res.status)
+            result.set_content(res.status .. ": " .. res.content)
         end
-    elseif res and res.secret_key then
-        result.set_content(
-            "Success! Your key is: "
-            .. res.secret_key
-            .. "\n\nMAKE SURE TO SAVE IT! You will need it to update/delete your domain."
-        )
     else
         result.set_content("Failed due to unknown error.")
     end
