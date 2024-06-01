@@ -47,7 +47,7 @@ function fetch_dns(captcha)
 
     print(body)
     local res = fetch({
-        url = "http://localhost:8000/domain",
+        url = "https://api.buss.lol/domain",
         method = "POST",
         headers = { ["Content-Type"] = "application/json" },
         body = body,
@@ -70,7 +70,7 @@ publish_done.on_click(function()
 
     if res and res.status then
         if res.status == 202 then
-            img.set_source('http://localhost:8000/captcha-images/' .. res.content .. '.jpg')
+            img.set_source('http://api.buss.lol/captcha-images/' .. res.content .. '.jpg')
         else
             result.set_content(res.status .. ": " .. res.content)
         end
