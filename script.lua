@@ -18,7 +18,7 @@ local captcha_input = get("captcha_input")
 
 coroutine.wrap(function()
     local res = fetch({
-        url = "http://api.buss.lol/tlds",
+        url = "https://api.buss.lol/tlds",
         method = "GET",
         headers = { ["Content-Type"] = "application/json" },
     })
@@ -70,7 +70,7 @@ publish_done.on_click(function()
 
     if res and res.status then
         if res.status == 202 then
-            img.set_source('http://api.buss.lol/captcha-images/' .. res.content .. '.jpg')
+            img.set_source('https://api.buss.lol/captcha-images/' .. res.content .. '.jpg')
         else
             result.set_content(res.status .. ": " .. res.content)
         end
@@ -87,7 +87,7 @@ update_done.on_click(function()
         .. "}"
 
     local res = fetch({
-        url = "http://api.buss.lol/domain/" .. update_key.get_content(),
+        url = "https://api.buss.lol/domain/" .. update_key.get_content(),
         method = "PUT",
         headers = { ["Content-Type"] = "application/json" },
         body = body,
@@ -116,7 +116,7 @@ end)
 
 delete_done.on_click(function()
     local res = fetch({
-        url = "http://api.buss.lol/domain/" .. delete_key.get_content(),
+        url = "https://api.buss.lol/domain/" .. delete_key.get_content(),
         method = "DELETE",
         headers = { ["Content-Type"] = "application/json" },
     })
