@@ -13,8 +13,6 @@ local delete_key = get("delete-input-key")
 local delete_done = get("done-3")
 
 local result = get("result")
-local img = get("image")
-local captcha_input = get("captcha_input")
 
 coroutine.wrap(function()
     local res = fetch({
@@ -27,7 +25,7 @@ coroutine.wrap(function()
     get("tlds").set_content("Available TLDs: " .. tld_list)
 end)()
 
-function fetch_dns(captcha)
+function fetch_dns()
     local body = "{"
     .. '"tld": "'
     .. publish_tld.get_content()
@@ -37,13 +35,7 @@ function fetch_dns(captcha)
     .. '", '
     .. '"ip": "'
     .. publish_ip.get_content()
-    .. '"'
-
-    if captcha then
-        body = body .. ', "captcha": "' .. captcha_input.get_content() .. '" }'
-    else
-        body = body .. "}"
-    end
+    .. '" }'
 
     print(body)
     local res = fetch({
@@ -56,26 +48,13 @@ function fetch_dns(captcha)
     return res
 end
 
-captcha_input.on_submit(function()
-    local res = fetch_dns(true);
+publish_done.on_click(function()
+    local res = fetch_dns()
 
-    print(res)
     if res["secret_key"] then
         result.set_content("Congrats! Your key: " .. res["secret_key"] .. "\nPLEASE SAVE IT.")
-    end
-end)
-
-publish_done.on_click(function()
-    local res = fetch_dns(false)
-
-    if res and res.status then
-        if res.status == 202 then
-            img.set_source('https://api.buss.lol/captcha-images/' .. res.content .. '.jpg')
-        else
-            result.set_content(res.status .. ": " .. res.content)
-        end
     else
-        result.set_content("Failed due to unknown error.")
+        result.set_content(res.status .. ": " .. res.content)
     end
 end)
 
