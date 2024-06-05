@@ -1,5 +1,3 @@
-print(window.query)
-
 local publish_domain = get("publish-input-domain")
 local publish_tld = get("publish-input-tld")
 local publish_ip = get("publish-input-ip")
@@ -54,7 +52,7 @@ publish_done.on_click(function()
     if res["secret_key"] then
         result.set_content("Congrats! Your key: " .. res["secret_key"] .. "\nPLEASE SAVE IT.")
     else
-        result.set_content(res.status .. ": " .. res.content)
+        result.set_content(res.msg .. " | " .. res.error)
     end
 end)
 
